@@ -1,4 +1,6 @@
 #include "Asteroid.h"
+#include "Start.h"
+#include "End.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
@@ -13,7 +15,6 @@ int main(){
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;
     sf::RenderWindow window(sf::VideoMode(1200, 1080), "Asteroids Prototype", sf::Style::Default,settings);
-
     //-------------------------------- LOAD FONT ----------------------------------------
     sf::Font font;
     font.loadFromFile("slkscre.ttf");
@@ -46,40 +47,10 @@ int main(){
     exitText.setFillColor(sf::Color::White); // Set the color of the text
     exitText.setPosition(800, 10);     // Set the position of the text on the screen
     exitText.setString("Press ESC to Exit");
-    //-------------------------------- CREATE TITLE SCREEN TEXT --------------------------------
-    sf::Text titleText;
-    titleText.setFont(font);           // Set the loaded font
-    titleText.setCharacterSize(100);    // Set the size of the text
-    titleText.setFillColor(sf::Color::White); // Set the color of the text
-    titleText.setPosition(275, 375);     // Set the position of the text on the screen
-    titleText.setString("Asteroids");
     //-------------------------------- CREATE START SCREEN TEXT --------------------------------
-    sf::Text startText;
-    startText.setFont(font);           // Set the loaded font
-    startText.setCharacterSize(30);    // Set the size of the text
-    startText.setFillColor(sf::Color::White); // Set the color of the text
-    startText.setPosition(385, 525);     // Set the position of the text on the screen
-    startText.setString("Press Enter to Start");
+    Start startScreen;
     //-------------------------------- CREATE END SCREEN TEXT --------------------------------
-    sf::Text endText;
-    endText.setFont(font);           // Set the loaded font
-    endText.setCharacterSize(50);    // Set the size of the text
-    endText.setFillColor(sf::Color::White); // Set the color of the text
-    endText.setPosition(400, 450);     // Set the position of the text on the screen
-    endText.setString("Game Over");
-    //-------------------------------- CREATE END SCORE TEXT --------------------------------
-    sf::Text endScore;
-    endScore.setFont(font);           // Set the loaded font
-    endScore.setCharacterSize(30);    // Set the size of the text
-    endScore.setFillColor(sf::Color::White); // Set the color of the text
-    endScore.setPosition(400, 350);     // Set the position of the text on the screen
-    //-------------------------------- CREATE RESTART SCREEN TEXT --------------------------------
-    sf::Text restartText;
-    restartText.setFont(font);           // Set the loaded font
-    restartText.setCharacterSize(30);    // Set the size of the text
-    restartText.setFillColor(sf::Color::White); // Set the color of the text
-    restartText.setPosition(400, 580);     // Set the position of the text on the screen
-    restartText.setString("Press Enter to Restart");
+    End endScreen;
     //-------------------------------- INITIALIZE ROCKET --------------------------------
     std::vector<GameObject*> GameObjects{};
     GameObjects.push_back(new Rocket(GameObjects));
@@ -119,9 +90,6 @@ int main(){
     }
     //-------------------------------- INITIALIZE CLOCK ---------------------------------
     sf::Clock clock;
-    //-------------------------------- CREATE START SCREEN --------------------------------
-    bool startScreen = true;
-    bool endScreen = false;
     //-------------------------------- MAIN GAME LOOP -----------------------------------
     while (window.isOpen()) {
         sf::Event event;
@@ -130,8 +98,8 @@ int main(){
                 window.close();
             }
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Enter && startScreen == true) {
-                    startScreen = false;
+                if (event.key.code == sf::Keyboard::Enter && startScreen.getStatus() == true) {
+                    startScreen.setStatus(false);
                     for (auto obj : GameObjects) {
                         delete obj;
                     }
@@ -169,10 +137,10 @@ int main(){
                     GameObjects.push_back(asteroid);
                     }
                 } 
-                if (event.key.code == sf::Keyboard::Escape && endScreen == false && startScreen == false) {
-                    endScreen = true;
+                if (event.key.code == sf::Keyboard::Escape && endScreen.getStatus() == false && startScreen.getStatus() == false) {
+                    endScreen.setStatus(true);
                 }
-                if (event.key.code == sf::Keyboard::Enter && endScreen == true) {
+                if (event.key.code == sf::Keyboard::Enter && endScreen.getStatus() == true) {
                     score = 0;
                     for (auto obj : GameObjects) {
                         delete obj;
@@ -213,8 +181,8 @@ int main(){
                     }
 
                     // Hide the end screen and return to the game
-                    endScreen = false;
-                    startScreen = true;
+                    endScreen.setStatus(false);
+                    startScreen.setStatus(true);
                 }
             }
         }
@@ -224,9 +192,8 @@ int main(){
         float deltaTime = Time.asSeconds();
 
         window.clear(sf::Color::Black);
-        if (startScreen == true) {
-            window.draw(titleText);
-            window.draw(startText);
+        if (startScreen.getStatus() == true) {
+            startScreen.draw(window);
             for (size_t i = 0; i < GameObjects.size(); i++) {
             // Check if it's an asteroid and draw accordingly
             if (Asteroid* asteroid = dynamic_cast<Asteroid*>(GameObjects[i])) {
@@ -234,11 +201,10 @@ int main(){
                 asteroid->draw(window);  // Use the Asteroid-specific draw method
             } 
             }
-        } else if (endScreen == true) {
-            endScore.setString("Score: " + std::to_string(score));
-            window.draw(endText);
-            window.draw(endScore);
-            window.draw(restartText);
+
+        } else if (endScreen.getStatus() == true) {
+            endScreen.setScore(score);
+            endScreen.draw(window);
         } else {
           //beatSound.play();
           scoreText.setString("Score: " + std::to_string(score));
@@ -250,6 +216,7 @@ int main(){
             GameObjects[i]->updateMovement(deltaTime);
             Rocket* rocket = dynamic_cast<Rocket*>(GameObjects[i]);
             if (rocket) {
+                
                 sf::FloatRect rocketBounds = rocket->getBoundingBox();
                 for (size_t j = 0; j < GameObjects.size(); j++) {
                     Asteroid* asteroid = dynamic_cast<Asteroid*>(GameObjects[j]);
@@ -259,7 +226,7 @@ int main(){
                             // Bounding boxes intersect, perform detailed collision check
                             if (asteroid->checkDetailedCollisionRocket(rocket)) {
                               collisionSound.play();
-                              endScreen = true;
+                              endScreen.setStatus(true);
                               // Collision detected: mark both objects for
                               // deletion
                               objectsToDelete.push_back(GameObjects[i]);
