@@ -8,50 +8,74 @@
 
 class Bullet : public GameObject {
     private:
-     sf::Texture bulletTexture;
-     sf::Sprite bulletSprite;
+     sf::CircleShape bulletShape;  // Use CircleShape instead of Sprite
      sf::Vector2f bullet_velocity;
      float bullet_speed = 800.0f;
      float angle;
-     float max_life_time = 0.9f;
+     float max_life_time = 1.0f;
      sf::Vector2f initial_position;
      bool delete_status = false;
      float life_time = 0;
+     sf::Vector2f bullet_position;
+     float bullet_radius = 3.0f;  // Define the radius of the bullet
+     
     public:
      Bullet(float angle, sf::Vector2f position) : angle(angle) {
-      bulletTexture.loadFromFile("assets/bullet.png"); // Import Bullet Texture
-      bulletSprite.setTexture(bulletTexture); // Set Bullet Sprite
-      bulletSprite.setScale(2.0f, 2.0f);
-      sf::Vector2u textureSize = bulletTexture.getSize(); // Get Size Of Bullet Texture
-      bulletSprite.setOrigin(textureSize.x/2.0f, textureSize.y/ 2.0f); // Set Origin To The Center Of Sprite
-      initial_position = position;
-      bulletSprite.setPosition(position);  // Set Default Location
-      bulletSprite.setRotation(angle); // Set Default Rotation
-      //-----------
-      float radianAngle = angle * 3.14159f / 180.0f;
-      sf::Vector2f bullet_direction(cos(radianAngle), sin(radianAngle));
+      bulletShape.setRadius(bullet_radius);  // Set the radius of the bullet
+      bulletShape.setFillColor(sf::Color::White);  // Color it white like in Asteroids
+      bulletShape.setOrigin(bullet_radius, bullet_radius);  // Set origin to the center of the circle
+      
+      float radianAngle = angle * 3.14159f / 180.0f;  // Convert angle to radians
+      sf::Vector2f bullet_direction(cos(radianAngle), sin(radianAngle));  // Calculate direction
       bullet_velocity = bullet_speed * bullet_direction;
+      
+      initial_position = position + bullet_direction * 20.0f;  // Offset the bullet from the rocket's position
+      bulletShape.setPosition(initial_position);  // Set the initial position of the bullet
      }
+     
      void updateMovement(float deltaTime) override {
-        sf::Vector2f bullet_position = bulletSprite.getPosition();
-        bulletSprite.setPosition(bullet_position + bullet_velocity * deltaTime);
-        bullet_position = bulletSprite.getPosition();
+        bullet_position = bulletShape.getPosition();
+        bulletShape.setPosition(bullet_position + bullet_velocity * deltaTime);  // Move the bullet
+        bullet_position = bulletShape.getPosition();
+        
+        // Handle screen wrapping
         if (bullet_position.x > 1200) {
-          bulletSprite.setPosition(0, bullet_position.y);
+          bulletShape.setPosition(0, bullet_position.y);
         } else if (bullet_position.x < 0) {
-          bulletSprite.setPosition(1200, bullet_position.y);
+          bulletShape.setPosition(1200, bullet_position.y);
         }
-        if (bullet_position.y > 800) {
-          bulletSprite.setPosition(bullet_position.x, 0);
+        if (bullet_position.y > 1080) {
+          bulletShape.setPosition(bullet_position.x, 0);
         } else if (bullet_position.y < 0) {
-          bulletSprite.setPosition(bullet_position.x, 800);
+          bulletShape.setPosition(bullet_position.x, 1080);
         }
+        
+        // Check if bullet should be deleted after a certain lifetime
         life_time += deltaTime;
-        if (life_time > max_life_time){
+        if (life_time > max_life_time) {
           delete_status = true;
         }
-     };
-     sf::Sprite getSprite() override {return bulletSprite;};
-     bool deleteStatus() override { return delete_status; };
+     }
+
+     // Get the bullet's current position
+     sf::Vector2f getPosition() { 
+        return bulletShape.getPosition(); 
+     }
+
+     // Get the radius of the bullet for collision detection
+     float getRadius() { 
+        return bullet_radius; 
+     }
+
+     // Draw the bullet using the CircleShape
+     sf::CircleShape getShape() { 
+        return bulletShape; 
+     }
+     void markForDeletion() { delete_status = true; }
+     // Check if the bullet should be deleted
+     bool deleteStatus() override { 
+        return delete_status; 
+     }
+
 };
 #endif
