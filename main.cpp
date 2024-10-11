@@ -216,7 +216,6 @@ int main(){
             GameObjects[i]->updateMovement(deltaTime);
             Rocket* rocket = dynamic_cast<Rocket*>(GameObjects[i]);
             if (rocket) {
-                
                 sf::FloatRect rocketBounds = rocket->getBoundingBox();
                 for (size_t j = 0; j < GameObjects.size(); j++) {
                     Asteroid* asteroid = dynamic_cast<Asteroid*>(GameObjects[j]);
