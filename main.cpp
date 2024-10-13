@@ -2,12 +2,13 @@
 #include "Game.h"
 #include "Start.h"
 #include "End.h"
+#include "Leaderboard.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
-
+#include <string>
 
 int main(){
     //-------------------------------- INITIALIZE FRAME --------------------------------
@@ -35,10 +36,14 @@ int main(){
     Start startScreen;
     //-------------------------------- CREATE END SCREEN --------------------------------
     End endScreen;
+    //-------------------------------- CREATE LEADERBOARD --------------------------------
+    Leaderboard leaderboard;
     //-------------------------------- INITIALIZE GAME OBJECTS --------------------------------
     std::vector<GameObject*> GameObjects{};
     std::vector<GameObject*> objectsToDelete;
     Game game(GameObjects, objectsToDelete);
+    sf::String playerName;
+    bool enteringName = false;
     //-------------------------------- INITIALIZE CLOCK ---------------------------------
     sf::Clock clock;
     //-------------------------------- MAIN GAME LOOP -----------------------------------
@@ -48,6 +53,20 @@ int main(){
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+            //-------------------------------- ENTER NAME --------------------------------
+            if (enteringName && event.type == sf::Event::TextEntered) {
+                if (event.text.unicode == 8) { // Backspace
+                    if (!playerName.isEmpty()) {
+                        playerName.erase(playerName.getSize() - 1, 1);  // Remove the last character
+                    }
+                } 
+                else if ((event.text.unicode >= 'A' && event.text.unicode <= 'Z') || // Uppercase letters
+                        (event.text.unicode >= 'a' && event.text.unicode <= 'z') || // Lowercase letters
+                        (playerName.getSize() < 10)) { // Ensure name length is less than 10
+                    playerName += static_cast<char>(event.text.unicode);  // Append character to playerName
+                }
+            }
+
             if (event.type == sf::Event::KeyPressed) {
                 //-------------------------------- START GAME --------------------------------
                 if (event.key.code == sf::Keyboard::Enter && startScreen.getStatus() == true) {
@@ -55,9 +74,32 @@ int main(){
                     game.deleteGameObjects();
                     game.resetGame();
                 } 
+                //-------------------------------- VIEW LEADERBOARD --------------------------------
+                if (event.key.code == sf::Keyboard::Space && startScreen.getStatus() == true) {
+                    startScreen.setStatus(false);
+                    leaderboard.setStatus(true);
+                }
+                //-------------------------------- EXIT LEADERBOARD --------------------------------
+                if (event.key.code == sf::Keyboard::Escape && leaderboard.getStatus() == true) {
+                    leaderboard.setStatus(false);
+                    startScreen.setStatus(true);
+                }
                 //-------------------------------- END GAME --------------------------------
                 if (event.key.code == sf::Keyboard::Escape && endScreen.getStatus() == false && startScreen.getStatus() == false) {
                     endScreen.setStatus(true);
+                }
+                //-------------------------------- ENTER NAME --------------------------------
+                if (event.key.code == sf::Keyboard::Return && enteringName == true) {
+                    if (playerName != "") {
+                    leaderboard.addScore(playerName, score);
+                    enteringName = false;
+                    playerName = "";
+                    score = 0;
+                    game.deleteGameObjects();
+                    game.resetGame();
+                    endScreen.setStatus(false);
+                    startScreen.setStatus(true);
+                    }
                 }
                 //-------------------------------- RESTART GAME --------------------------------
                 if (event.key.code == sf::Keyboard::Enter && endScreen.getStatus() == true) {
@@ -85,21 +127,37 @@ int main(){
                 asteroid->draw(window);  // Use the Asteroid-specific draw method
             } 
             }
-
-        } 
+        } else if (leaderboard.getStatus() == true) {
+            leaderboard.draw(window);
+        }
         //-------------------------------- END SCREEN --------------------------------
         else if (endScreen.getStatus() == true) {
             endScreen.setScore(score);
             endScreen.draw(window);
         } 
+        //-------------------------------- ENTER NAME SCREEN --------------------------------
+        else if (enteringName) {
+            sf::Text promptText("Enter your name:", font, 30);
+            promptText.setPosition(300, 300);
+            window.draw(promptText);
+
+            sf::Text nameText(playerName, font, 30);
+            nameText.setPosition(300, 400);
+            window.draw(nameText);
         //-------------------------------- GAME SCREEN --------------------------------
-        else {
+        } else {
           //beatSound.play();
           scoreText.setString("Score: " + std::to_string(score));
           window.draw(scoreText);
           window.draw(exitText);
           //-------------------------------- UPDATE AND DRAW GAME OBJECTS --------------------------------
-          endScreen.setStatus(game.checkRocketCollision(deltaTime));
+          game.updateMovement(deltaTime);
+          if (game.checkRocketCollision(deltaTime) && leaderboard.isTop10Score(score)) {
+            enteringName = true;
+          }
+          else if (game.checkRocketCollision(deltaTime)){
+            endScreen.setStatus(true);
+          };
           // Remove all objects marked for deletion
           game.removeObjectsToDelete();
           if (game.checkBulletCollision()) {

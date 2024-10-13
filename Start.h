@@ -7,11 +7,13 @@
 #include "Rocket.h"
 #include "Bullet.h"
 
+
 class Start {
 private:
  sf::Font font;
  sf::Text titleText;
  sf::Text startText;
+ sf::Text leaderboardText;
  bool status = true;
 
 public:
@@ -29,10 +31,17 @@ public:
     startText.setCharacterSize(30);
     startText.setPosition(385, 525);
     startText.setFillColor(sf::Color::White);
+    //Leaderboard
+    leaderboardText.setFont(font);
+    leaderboardText.setString("Press Space to View Leaderboard");
+    leaderboardText.setCharacterSize(30);
+    leaderboardText.setPosition(265, 600);
+    leaderboardText.setFillColor(sf::Color::White);
  };
  void draw(sf::RenderWindow& window){
     window.draw(titleText);
     window.draw(startText);
+    window.draw(leaderboardText);
  };
  bool getStatus(){
     return status;

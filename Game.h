@@ -122,7 +122,6 @@ public:
  bool checkRocketCollision(float deltaTime) {
    bool status = false;
    for (size_t i = 0; i < GameObjects.size(); i++) {
-     GameObjects[i]->updateMovement(deltaTime);
      Rocket* rocket = dynamic_cast<Rocket*>(GameObjects[i]);
      if (rocket) {
        rocketPosition = rocket->getPosition();

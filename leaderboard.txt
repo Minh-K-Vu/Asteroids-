@@ -1,0 +1,10 @@
+lucas 250
+minh 220
+lucas 160
+minh 140
+burger 100
+monster 90
+Chicken 70
+chicken 70
+chicken 70
+Nyan 40
