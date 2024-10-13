@@ -12,12 +12,14 @@
 
 class Rocket : public GameObject {
 private:
- sf::SoundBuffer thrustBuffer;
- sf::Sound thrustSound;
- float thrustSoundCooldown = 0.0f;
- float thrustSoundCooldownTime = 0.18f;
- sf::SoundBuffer fireBuffer;
- sf::Sound fireSound;
+    sf::SoundBuffer collisionBuffer;
+    sf::Sound collisionSound;
+    sf::SoundBuffer thrustBuffer;
+    sf::Sound thrustSound;
+    float thrustSoundCooldown = 0.0f;
+    float thrustSoundCooldownTime = 0.18f;
+    sf::SoundBuffer fireBuffer;
+    sf::Sound fireSound;
  sf::ConvexShape rocketShape;
  float angle = 0.0f;
  float turn_speed = 300.0f;
@@ -91,6 +93,8 @@ private:
 public:
     // Constructor to initialize the rocket
     Rocket(std::vector<GameObject*>& gameObjects) : gameObjects(gameObjects) {
+        collisionBuffer.loadFromFile("bangMedium.wav");
+        collisionSound.setBuffer(collisionBuffer);
         thrustBuffer.loadFromFile("thrust.wav"); //Load Thrust Sound
         thrustSound.setBuffer(thrustBuffer);  //Set Thrust Sound
         fireBuffer.loadFromFile("fire.wav"); //Load Fire Sound
@@ -191,6 +195,10 @@ public:
     sf::FloatRect getBoundingBox() const {
         return rocketShape.getGlobalBounds();
     }
+    //------------------- **COLLISION SOUND** ------------------------
+    void playCollisionSound() {
+        collisionSound.play();
+    }
 
     
     std::vector<sf::Vector2f> getPoints() {
@@ -208,6 +216,7 @@ public:
     void draw(sf::RenderWindow& window) { window.draw(rocketShape); };
     void markForDeletion() { delete_status = true; }
     bool deleteStatus() override { return false; };
+    sf::Vector2f getPosition() { return rocketShape.getPosition(); }
 };
 
 #endif

@@ -1,9 +1,11 @@
 #ifndef BULLET_H
 #define BULLET_H
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include "GameObject.h"
 #include "Rocket.h"
+
 #include <cmath>
 
 class Bullet : public GameObject {
@@ -18,7 +20,8 @@ class Bullet : public GameObject {
      float life_time = 0;
      sf::Vector2f bullet_position;
      float bullet_radius = 3.0f;  // Define the radius of the bullet
-     
+     sf::SoundBuffer smallCollisionBuffer;
+    sf::Sound smallCollisionSound;
     public:
      Bullet(float angle, sf::Vector2f position) : angle(angle) {
       bulletShape.setRadius(bullet_radius);  // Set the radius of the bullet
@@ -28,7 +31,8 @@ class Bullet : public GameObject {
       float radianAngle = angle * 3.14159f / 180.0f;  // Convert angle to radians
       sf::Vector2f bullet_direction(cos(radianAngle), sin(radianAngle));  // Calculate direction
       bullet_velocity = bullet_speed * bullet_direction;
-      
+      smallCollisionBuffer.loadFromFile("bangMedium.wav");
+      smallCollisionSound.setBuffer(smallCollisionBuffer);
       initial_position = position + bullet_direction * 20.0f;  // Offset the bullet from the rocket's position
       bulletShape.setPosition(initial_position);  // Set the initial position of the bullet
      }
@@ -65,6 +69,10 @@ class Bullet : public GameObject {
      // Get the radius of the bullet for collision detection
      float getRadius() { 
         return bullet_radius; 
+     }
+     // Play the small collision sound
+     void playSmallCollisionSound() {
+        smallCollisionSound.play();
      }
 
      // Draw the bullet using the CircleShape
