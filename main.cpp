@@ -1,4 +1,8 @@
 #include "Asteroid.h"
+#include "GameObjectTest.h"
+#include "AsteroidTest.h"
+#include "RocketTest.h"
+#include "BulletTest.h"
 #include "Game.h"
 #include "Start.h"
 #include "End.h"
@@ -9,8 +13,18 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 int main(){
+    //-------------------------------- RUN UNIT TESTS ----------------------------------
+    gameObjectTest testGameObject;
+    testGameObject.runTests();
+    asteroidTest testAsteroid;
+    testAsteroid.runTests();
+    RocketTest testRocket;
+    testRocket.runTests();
+    BulletTest testBullet;
+    testBullet.runTests();
     //-------------------------------- INITIALIZE FRAME --------------------------------
     sf::ContextSettings settings;
     settings.antialiasingLevel = 8;

@@ -38,14 +38,17 @@ public:
     leaderboardText.setPosition(265, 600);
     leaderboardText.setFillColor(sf::Color::White);
  };
+ //Draw the start screen
  void draw(sf::RenderWindow& window){
     window.draw(titleText);
     window.draw(startText);
     window.draw(leaderboardText);
  };
+ //Get the status of the start screen
  bool getStatus(){
     return status;
  }
+ //Set the status of the start screen
  void setStatus(bool newStatus){
     status = newStatus;
  }

@@ -210,6 +210,7 @@ class Asteroid : public GameObject {
         delete_status = true;
     }
     bool deleteStatus() override { return delete_status; }; // Placeholder for delete status
+    float getScaleFactor() { return scaleFactor; }
 };
 
 #endif

@@ -36,17 +36,21 @@ public:
     endScore.setFillColor(sf::Color::White);
     endScore.setPosition(400, 350);
  };
+ // Draw the end screen
  void draw(sf::RenderWindow& window){
     window.draw(endText);
     window.draw(restartText);
     window.draw(endScore);
  };
+ // Get the status of the end screen
  bool getStatus(){
     return status;
  }
+ // Set the status of the end screen
  void setStatus(bool newStatus){
     status = newStatus;
  }
+ // Set the score of the end screen
  void setScore(int newScore){
     endScore.setString("Score: " + std::to_string(newScore));
  }

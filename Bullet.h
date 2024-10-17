@@ -10,7 +10,7 @@
 
 class Bullet : public GameObject {
     private:
-     sf::CircleShape bulletShape;  // Use CircleShape instead of Sprite
+     sf::CircleShape bulletShape;
      sf::Vector2f bullet_velocity;
      float bullet_speed = 800.0f;
      float angle;
@@ -19,19 +19,19 @@ class Bullet : public GameObject {
      bool delete_status = false;
      float life_time = 0;
      sf::Vector2f bullet_position;
-     float bullet_radius = 3.0f;  // Define the radius of the bullet
+     float bullet_radius = 3.0f;
      sf::SoundBuffer smallCollisionBuffer;
     sf::Sound smallCollisionSound;
     public:
      Bullet(float angle, sf::Vector2f position) : angle(angle) {
       bulletShape.setRadius(bullet_radius);  // Set the radius of the bullet
-      bulletShape.setFillColor(sf::Color::White);  // Color it white like in Asteroids
+      bulletShape.setFillColor(sf::Color::White);  // White color
       bulletShape.setOrigin(bullet_radius, bullet_radius);  // Set origin to the center of the circle
       
       float radianAngle = angle * 3.14159f / 180.0f;  // Convert angle to radians
       sf::Vector2f bullet_direction(cos(radianAngle), sin(radianAngle));  // Calculate direction
       bullet_velocity = bullet_speed * bullet_direction;
-      smallCollisionBuffer.loadFromFile("bangMedium.wav");
+      smallCollisionBuffer.loadFromFile("Audio/bangMedium.wav");
       smallCollisionSound.setBuffer(smallCollisionBuffer);
       initial_position = position + bullet_direction * 20.0f;  // Offset the bullet from the rocket's position
       bulletShape.setPosition(initial_position);  // Set the initial position of the bullet
@@ -70,7 +70,7 @@ class Bullet : public GameObject {
      float getRadius() { 
         return bullet_radius; 
      }
-     // Play the small collision sound
+     // Play small collision sound
      void playSmallCollisionSound() {
         smallCollisionSound.play();
      }

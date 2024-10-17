@@ -16,6 +16,7 @@ private:
     sf::Text leaderboardText;
     bool status;
 public: 
+    // Constructor
     Leaderboard(){
         font.loadFromFile("slkscre.ttf");
         leaderboardText.setFont(font);
@@ -23,6 +24,8 @@ public:
         leaderboardText.setFillColor(sf::Color::White);
         loadScores();
     };
+
+    // Load scores from file
     void loadScores(){
         std::ifstream file(filename);
         scores.clear();
@@ -33,6 +36,8 @@ public:
         }
         file.close();
     };
+
+    // Save scores to file
     void saveScores(){
         std::ofstream file(filename);
         for (const auto& score : scores) {
@@ -40,27 +45,32 @@ public:
         }
         file.close();
     };
+
+    // Add a new score
     void addScore(const std::string& name, int score){
         scores.push_back(std::make_pair(name, score));
 
-    // Sort by score in descending order
-    std::sort(scores.begin(), scores.end(), [](const auto& lhs, const auto& rhs) {
-        return lhs.second > rhs.second;
-    });
+        // Sort by score in descending order
+        std::sort(scores.begin(), scores.end(), [](const auto& lhs, const auto& rhs) {
+            return lhs.second > rhs.second;
+        });
 
-    // Keep only top 10 scores
-    if (scores.size() > 10) {
-        scores.resize(10);
-    }
+        // Keep only top 10 scores
+        if (scores.size() > 10) {
+            scores.resize(10);
+        }
 
         saveScores();
     };
+
+    // Check if a score is in the top 10
     bool isTop10Score(int score){
         if (scores.size() < 10) return true;
         return score > scores[9].second;
     };
-    void draw(sf::RenderWindow& window){
 
+    // Draw the leaderboard
+    void draw(sf::RenderWindow& window){
         std::string leaderboardString = "Leaderboard\n";
         for (size_t i = 0; i < scores.size(); ++i) {
             leaderboardString += std::to_string(i + 1) + ". " + scores[i].first + " - " + std::to_string(scores[i].second) + "\n";
@@ -70,9 +80,13 @@ public:
         leaderboardText.setPosition(500, 100);
         window.draw(leaderboardText);
     };
+
+    // Get status
     bool getStatus(){
         return status;
     };
+
+    // Set status
     void setStatus(bool newStatus){
         status = newStatus;
     };

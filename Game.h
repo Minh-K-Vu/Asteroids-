@@ -8,6 +8,7 @@
 #include "Bullet.h"
 #include "Asteroid.h"
 #include "End.h"
+#include <algorithm>
 
 class Game {
 private:
@@ -26,16 +27,15 @@ public:
 // CONSTRUCTOR
 //================================
  Game(std::vector<GameObject*>& GameObjects, std::vector<GameObject*>& objectsToDelete) : GameObjects(GameObjects), objectsToDelete(objectsToDelete) {
-    srand(static_cast<unsigned int>(time(0)));  // Seed random number generator
-    randomSeed = rand(); 
-    collisionBuffer.loadFromFile("bangLarge.wav");
+    std::srand(static_cast<unsigned int>(std::time(0)));
+    collisionBuffer.loadFromFile("Audio/bangLarge.wav");
     collisionSound.setBuffer(collisionBuffer);
-    smallCollisionBuffer.loadFromFile("bangMedium.wav");
+    smallCollisionBuffer.loadFromFile("Audio/bangMedium.wav");
     smallCollisionSound.setBuffer(smallCollisionBuffer);
     GameObjects.push_back(new Rocket(GameObjects));
     this->roundNumber = 0;
     for (int i = 0; i < initialAsteroids; i++) {
-    int randomAsteroid = (rand_r(&randomSeed) % 4) + 1;
+    int randomAsteroid = (rand() % 4) + 1;
     Asteroid* asteroid = new Asteroid(randomAsteroid, 1);
     // Exclusion Zone where asteroids cannot spawn
     float exclusionLeftZone = 400.0f;
@@ -46,15 +46,15 @@ public:
     float randomY;
     // Randomize starting position within the window bounds
     do {
-        randomX = static_cast<float>(rand_r(&randomSeed) % 1200);
-        randomY = static_cast<float>(rand_r(&randomSeed) % 1080);
+        randomX = static_cast<float>(rand() % 1200);
+        randomY = static_cast<float>(rand() % 1080);
     } while (randomX > exclusionLeftZone && randomX < exclusionRightZone && randomY > exclusionTopZone && randomY < exclusionBottomZone);
 
     asteroid->setPosition(sf::Vector2f(randomX, randomY)); 
 
     // Randomize velocity for each asteroid
-    float randomVelX = static_cast<float>((rand_r(&randomSeed) % 200) - 100); // Random velocity between -100 and 100
-    float randomVelY = static_cast<float>((rand_r(&randomSeed) % 200) - 100);
+    float randomVelX = static_cast<float>((rand() % 200) - 100); // Random velocity between -100 and 100
+    float randomVelY = static_cast<float>((rand() % 200) - 100);
     
     // Normalize the velocity vector to ensure it has the same speed
     float speed = 80.0f;  // Set a fixed speed for all asteroids
@@ -75,7 +75,7 @@ public:
     GameObjects.push_back(new Rocket(GameObjects));
     this->roundNumber = 0;
     for (int i = 0; i < initialAsteroids; i++) {
-    int randomAsteroid = (rand_r(&randomSeed) % 4) + 1;
+    int randomAsteroid = (rand() % 4) + 1;
     Asteroid* asteroid = new Asteroid(randomAsteroid, 1);
     // Exclusion Zone where asteroids cannot spawn
     float exclusionLeftZone = 400.0f;
@@ -86,15 +86,15 @@ public:
     float randomY;
     // Randomize starting position within the window bounds
     do {
-        randomX = static_cast<float>(rand_r(&randomSeed) % 1200);
-        randomY = static_cast<float>(rand_r(&randomSeed) % 1080);
+        randomX = static_cast<float>(rand() % 1200);
+        randomY = static_cast<float>(rand() % 1080);
     } while (randomX > exclusionLeftZone && randomX < exclusionRightZone && randomY > exclusionTopZone && randomY < exclusionBottomZone);
 
     asteroid->setPosition(sf::Vector2f(randomX, randomY)); 
 
     // Randomize velocity for each asteroid
-    float randomVelX = static_cast<float>((rand_r(&randomSeed) % 200) - 100); // Random velocity between -100 and 100
-    float randomVelY = static_cast<float>((rand_r(&randomSeed) % 200) - 100);
+    float randomVelX = static_cast<float>((rand() % 200) - 100); // Random velocity between -100 and 100
+    float randomVelY = static_cast<float>((rand() % 200) - 100);
     
     // Normalize the velocity vector to ensure it has the same speed
     float speed = 80.0f;  // Set a fixed speed for all asteroids
@@ -171,14 +171,14 @@ public:
                             // Generate two new smaller asteroids
                             for (int i = 0; i < 2; i++) {
                                 // Create a new asteroid that is one size smaller
-                                Asteroid* smallerAsteroid = new Asteroid(((rand_r(&randomSeed) % 4) + 1), asteroid->getSize() + 1);
+                                Asteroid* smallerAsteroid = new Asteroid(((rand() % 4) + 1), asteroid->getSize() + 1);
                                 // Set the position of the new asteroid to the position of the original asteroid
                                 smallerAsteroid->setPosition(asteroid->getPosition());
                                 // Adjust velocity slightly to simulate the asteroids splitting in different directions
                                 sf::Vector2f smallerAsteroidVelocity = asteroidVelocity;
                                 float smallerAsteroidSpeed = 0.0f;
                                 if (i == 0) {
-                                    int randomAngle = (rand_r(&randomSeed) % 45) + 1;
+                                    int randomAngle = (rand() % 45) + 1;
                                     smallerAsteroidVelocity = sf::Vector2f(
                                         asteroidVelocity.x * cos(randomAngle * 3.14159f / 180) - asteroidVelocity.y * sin(randomAngle * 3.14159f / 180),
                                         asteroidVelocity.x * sin(randomAngle * 3.14159f / 180) + asteroidVelocity.y * cos(randomAngle * 3.14159f / 180)
@@ -186,7 +186,7 @@ public:
                                     smallerAsteroidSpeed = static_cast<float>(rand() % static_cast<int>(totalSmallerAsteroidSpeed / 2.0f)) + (totalSmallerAsteroidSpeed / 3);
                                     totalSmallerAsteroidSpeed -= smallerAsteroidSpeed;
                                 } else {
-                                    int randomAngle = -1 * ((rand_r(&randomSeed) % 45) + 1);
+                                    int randomAngle = -1 * ((rand() % 45) + 1);
                                     // Rotate in the opposite direction for the second smaller asteroid
                                     smallerAsteroidVelocity = sf::Vector2f(
                                         asteroidVelocity.x * cos(randomAngle * 3.14159f / 180) - asteroidVelocity.y * sin(randomAngle * 3.14159f / 180),
@@ -231,7 +231,7 @@ public:
  void newRound() {
     roundNumber++;
     for (int i = 0; i < initialAsteroids + roundNumber; i++) {
-        int randomAsteroid = (rand_r(&randomSeed) % 4) + 1;
+        int randomAsteroid = (rand() % 4) + 1;
         Asteroid* asteroid = new Asteroid(randomAsteroid, 1);
         // Exclusion Zone where asteroids cannot spawn
         float exclusionLeftZone = rocketPosition.x - 250.0f;
@@ -242,15 +242,15 @@ public:
         float randomY;
         // Randomize starting position within the window bounds
         do {
-            randomX = static_cast<float>(rand_r(&randomSeed) % 1200);
-            randomY = static_cast<float>(rand_r(&randomSeed) % 1080);
+            randomX = static_cast<float>(rand() % 1200);
+            randomY = static_cast<float>(rand() % 1080);
         } while (randomX > exclusionLeftZone && randomX < exclusionRightZone && randomY > exclusionTopZone && randomY < exclusionBottomZone);
 
         asteroid->setPosition(sf::Vector2f(randomX, randomY)); 
 
         // Randomize velocity for each asteroid
-        float randomVelX = static_cast<float>((rand_r(&randomSeed) % 200) - 100); // Random velocity between -100 and 100
-        float randomVelY = static_cast<float>((rand_r(&randomSeed) % 200) - 100);
+        float randomVelX = static_cast<float>((rand() % 200) - 100); // Random velocity between -100 and 100
+        float randomVelY = static_cast<float>((rand() % 200) - 100);
         
         // Normalize the velocity vector to ensure it has the same speed
         float speed = 80.0f;  // Set a fixed speed for all asteroids

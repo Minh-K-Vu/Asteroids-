@@ -73,31 +73,14 @@ private:
      float distance(const sf::Vector2f& p1, const sf::Vector2f& p2) {
         return std::sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
      }
-     // Check if a point is inside a polygon
-     bool isPointInsidePolygon(const sf::ConvexShape& polygon, sf::Vector2f& point) {
-       int intersection_count = 0;
-       for (int i = 0; i < polygon.getPointCount(); i++){
-          sf::Vector2f p1 = polygon.getPoint(i) + polygon.getPosition();
-          sf::Vector2f p2 = polygon.getPoint((i + 1) % polygon.getPointCount()) + polygon.getPosition();
-          if ((point.y > p1.y) != (point.y > p2.y)) {
-            float slope = (p2.x - p1.x) / (p2.y - p1.y);
-            float xAtY = p1.x + (point.y - p1.y) * slope;
-            if (point.x < xAtY) {
-              intersection_count++;
-            }
-          }
-       }
-       return (intersection_count % 2 == 1);
-     }
-
 public:
     // Constructor to initialize the rocket
     Rocket(std::vector<GameObject*>& gameObjects) : gameObjects(gameObjects) {
-        collisionBuffer.loadFromFile("bangMedium.wav");
+        collisionBuffer.loadFromFile("Audio/bangMedium.wav");
         collisionSound.setBuffer(collisionBuffer);
-        thrustBuffer.loadFromFile("thrust.wav"); //Load Thrust Sound
+        thrustBuffer.loadFromFile("Audio/thrust.wav"); //Load Thrust Sound
         thrustSound.setBuffer(thrustBuffer);  //Set Thrust Sound
-        fireBuffer.loadFromFile("fire.wav"); //Load Fire Sound
+        fireBuffer.loadFromFile("Audio/fire.wav"); //Load Fire Sound
         fireSound.setBuffer(fireBuffer); //Set Fire Sound
         createRocket(); // Initialize the rocket shape
         rocketShape.setPosition(sf::Vector2f(600, 500));  // Set default position
@@ -107,7 +90,7 @@ public:
         rocketShape.setOutlineThickness(2); // Set the thickness of the outline
 
     }
-
+    
     //------------------- **UPDATE MOVEMENT** ------------------------
     void updateMovement(float deltaTime) override {
         //---------------------- ROTATION ------------------------------
@@ -176,21 +159,6 @@ public:
         }
         return edges;
     }
-    //------------------- COLLISION DETECTION ------------------------
-    // bool checkDetailedCollision(Asteroid* asteroid) {
-    // auto points = asteroid->getPoints();
-    // auto edges = this->getEdges();
-    
-    // for (const auto& point : points) {
-    //     for (const auto& edge : edges) {
-    //         float distance = distanceToLineSegment(point, edge.first, edge.second);
-    //         if (distance <= 2.0f) {
-    //           return true;  // Collision detected
-    //         }
-    //     }
-    // }
-    // return false;  // No collision detected
-    // }
     //------------------- **GET BOUNDING BOX** ------------------------
     sf::FloatRect getBoundingBox() const {
         return rocketShape.getGlobalBounds();
@@ -217,6 +185,38 @@ public:
     void markForDeletion() { delete_status = true; }
     bool deleteStatus() override { return false; };
     sf::Vector2f getPosition() { return rocketShape.getPosition(); }
+    float getRotation() { return rocketShape.getRotation(); }
+        //------------------- **HANDLE INPUT (USE FOR TESTING)** ------------------------
+    void handleInput(sf::Keyboard::Key key) {
+        //---------------------- ROTATION ------------------------------
+        if (key == sf::Keyboard::D) {
+            angle += turn_speed * 0.1f;  // Simulate 0.1 seconds of input
+        }
+        if (key == sf::Keyboard::A) {
+            angle -= turn_speed * 0.1f;
+        }
+        rocketShape.setRotation(angle);
+        float radianAngle = angle * 3.14159f / 180.0f;
+        sf::Vector2f rocket_direction(cos(radianAngle), sin(radianAngle));
+
+        //------------------- FORWARD MOVEMENT -------------------------
+        if (key == sf::Keyboard::W) {
+            sf::Vector2f rocket_position = rocketShape.getPosition();
+            rocket_velocity += (rocket_acceleration * rocket_direction * 0.1f);  // Simulate 0.1 seconds of input
+            float rocket_speed = std::sqrt(rocket_velocity.x * rocket_velocity.x + rocket_velocity.y * rocket_velocity.y);
+            if (rocket_speed > rocket_max_speed) {
+                rocket_velocity = (rocket_velocity / rocket_speed) * rocket_max_speed;
+            }
+            rocketShape.setPosition(rocket_position + rocket_velocity * 0.1f);
+        }
+
+        //---------------------- SHOOTING MECHANISM --------------------
+        if (key == sf::Keyboard::Space && bulletCooldown <= 0.0f) {
+            fireSound.play();
+            gameObjects.push_back(new Bullet(angle, rocketShape.getPosition()));
+            bulletCooldown = bulletCooldownTime;
+        }
+    }
 };
 
 #endif
